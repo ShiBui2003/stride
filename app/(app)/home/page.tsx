@@ -1,19 +1,23 @@
 // Home page — personal stats, stories row, and activity feed
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import useSWR from 'swr';
 import { MapTrifold, Flame, Lightning } from '@phosphor-icons/react';
+import { LottiePlayer } from '@/components/animations/LottiePlayer';
 import { StoriesRow } from '@/components/feed/StoriesRow';
 import { ActivityFeed } from '@/components/feed/ActivityFeed';
+import { RunReplay } from '@/components/map/RunReplay';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
 import { useAuth } from '@/hooks/useAuth';
 import { getFeedRuns } from '@/lib/supabase/queries/runs';
 import { getUserById, getUserStats, getRecentlyActiveFollowing } from '@/lib/supabase/queries/users';
 import { formatArea } from '@/lib/utils/formatters';
+import type { Run } from '@/types/run.types';
 
 export default function HomePage(): React.JSX.Element {
   const { user: authUser, loading: authLoading } = useAuth();
+  const [replayRun, setReplayRun] = useState<Run | null>(null);
 
   const { data: profile } = useSWR(
     authUser?.id ? `profile-${authUser.id}` : null,
@@ -78,7 +82,16 @@ export default function HomePage(): React.JSX.Element {
 
         <div className="bg-surface rounded-2xl p-3 space-y-1">
           <div className="flex items-center gap-1.5">
-            <Flame size={12} className="text-danger flex-shrink-0" />
+            {stats && stats.streak_count > 0 ? (
+              <LottiePlayer
+                src="/animations/streak-fire.json"
+                loop
+                autoplay
+                className="w-4 h-4 flex-shrink-0"
+              />
+            ) : (
+              <Flame size={12} className="text-danger flex-shrink-0" />
+            )}
             <span className="text-[9px] text-textSecondary uppercase tracking-wider font-body leading-none">
               Streak
             </span>
@@ -114,8 +127,11 @@ export default function HomePage(): React.JSX.Element {
         <p className="text-[10px] text-textSecondary uppercase tracking-widest font-body mb-3">
           Activity
         </p>
-        <ActivityFeed items={feedItems} loading={feedLoading} />
+        <ActivityFeed items={feedItems} loading={feedLoading} onReplay={setReplayRun} />
       </div>
+
+      {/* Run replay overlay — animates the tapped activity's GPS route */}
+      {replayRun && <RunReplay run={replayRun} onClose={() => setReplayRun(null)} />}
 
     </main>
   );

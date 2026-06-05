@@ -54,6 +54,18 @@ export async function getFeedRuns(userId: string): Promise<FeedItem[]> {
     }));
 }
 
+export async function getRunById(runId: string): Promise<Run | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('runs')
+    .select('*')
+    .eq('id', runId)
+    .single();
+
+  if (error) return null;
+  return data as Run;
+}
+
 export async function insertRun(run: Omit<Run, 'id'>): Promise<Run> {
   const supabase = createClient();
   const { data, error } = await supabase

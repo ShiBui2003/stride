@@ -1,7 +1,7 @@
 // Active run page — full-screen GPS tracking with live trail, HUD stats, and territory capture
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { mutate } from 'swr';
 import { MapContainer } from '@/components/map/MapContainer';
@@ -9,6 +9,7 @@ import { RunTrail } from '@/components/map/RunTrail';
 import { UserLocationDot } from '@/components/map/UserLocationDot';
 import { RunHUD } from '@/components/run/RunHUD';
 import { RunControls } from '@/components/run/RunControls';
+import { CaptureCelebration } from '@/components/animations/CaptureCelebration';
 import { useAuth } from '@/hooks/useAuth';
 import { useRunTracking } from '@/hooks/useRunTracking';
 import { insertRun } from '@/lib/supabase/queries/runs';
@@ -21,6 +22,8 @@ export default function RunActivePage(): React.JSX.Element {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [showCapture, setShowCapture] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Accumulates total m² captured across all polygon closures this run
+  const capturedAreaRef = useRef(0);
   const {
     isPaused,
     activeRun,
@@ -59,6 +62,7 @@ export default function RunActivePage(): React.JSX.Element {
 
     insertTerritory(user.id, JSON.stringify(capturedPolygon), area_m2)
       .then(() => {
+        capturedAreaRef.current += area_m2;
         setShowCapture(true);
         clearCapturedPolygon();
         setTimeout(() => setShowCapture(false), 2500);
@@ -103,7 +107,7 @@ export default function RunActivePage(): React.JSX.Element {
       void mutate(`feed-${user.id}`, undefined, { revalidate: true });
       void mutate(`stats-${user.id}`, undefined, { revalidate: true });
       void mutate(`runs-${user.id}`, undefined, { revalidate: true });
-      router.push(`/run/summary?runId=${run.id}`);
+      router.push(`/run/summary?runId=${run.id}&area=${Math.round(capturedAreaRef.current)}`);
     } catch (err) {
       // Supabase throws PostgrestError (plain object, not Error instance) — extract message safely
       const message =
@@ -154,23 +158,12 @@ export default function RunActivePage(): React.JSX.Element {
           onStop={() => { void handleStop(); }}
         />
 
-        {showCapture && <CaptureFlash />}
+        <CaptureCelebration
+          visible={showCapture}
+          onComplete={() => setShowCapture(false)}
+        />
       </div>
     </main>
   );
 }
 
-// Placeholder shown on territory capture — Rive animation replaces this in Phase 4
-function CaptureFlash(): React.JSX.Element {
-  return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-      <div className="absolute inset-0 bg-accent/10 animate-pulse" />
-      <div className="relative z-10 text-center px-8">
-        <p className="font-stats text-accent text-6xl tracking-widest leading-tight">CAPTURED</p>
-        <p className="font-body text-textSecondary text-sm mt-2 tracking-widest uppercase">
-          Territory is yours
-        </p>
-      </div>
-    </div>
-  );
-}

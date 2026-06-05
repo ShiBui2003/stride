@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Heart } from '@phosphor-icons/react';
+import { Heart, Play } from '@phosphor-icons/react';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { formatDistance, formatDuration, formatPace, formatRelativeTime } from '@/lib/utils/formatters';
@@ -14,9 +14,10 @@ interface ActivityCardProps {
   user: User;
   likesCount: number;
   onLike?: () => void;
+  onReplay?: () => void;
 }
 
-export function ActivityCard({ run, user, likesCount, onLike }: ActivityCardProps) {
+export function ActivityCard({ run, user, likesCount, onLike, onReplay }: ActivityCardProps) {
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(likesCount);
 
@@ -65,7 +66,7 @@ export function ActivityCard({ run, user, likesCount, onLike }: ActivityCardProp
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 pt-1 border-t border-white/5">
+      <div className="flex items-center gap-4 pt-1 border-t border-white/5">
         <button
           onClick={handleLike}
           className="flex items-center gap-1.5 transition-transform active:scale-95"
@@ -77,6 +78,15 @@ export function ActivityCard({ run, user, likesCount, onLike }: ActivityCardProp
           />
           <span className={`text-sm ${liked ? 'text-danger' : 'text-textSecondary'}`}>{count}</span>
         </button>
+        {onReplay && (
+          <button
+            onClick={onReplay}
+            className="flex items-center gap-1.5 transition-transform active:scale-95 text-accent"
+          >
+            <Play size={16} weight="fill" />
+            <span className="text-sm font-body">Replay</span>
+          </button>
+        )}
       </div>
     </Card>
   );

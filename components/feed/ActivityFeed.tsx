@@ -1,14 +1,15 @@
 // Scrollable list of activity cards for the home feed
 import { ActivityCard } from '@/components/feed/ActivityCard';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
-import type { FeedItem } from '@/types/run.types';
+import type { FeedItem, Run } from '@/types/run.types';
 
 interface ActivityFeedProps {
   items: FeedItem[];
   loading?: boolean;
+  onReplay?: (run: Run) => void;
 }
 
-export function ActivityFeed({ items, loading = false }: ActivityFeedProps) {
+export function ActivityFeed({ items, loading = false, onReplay }: ActivityFeedProps) {
   if (loading) {
     return (
       <div className="space-y-3">
@@ -36,6 +37,7 @@ export function ActivityFeed({ items, loading = false }: ActivityFeedProps) {
           run={item.run}
           user={item.user}
           likesCount={item.likes_count}
+          onReplay={onReplay ? () => onReplay(item.run) : undefined}
         />
       ))}
     </div>

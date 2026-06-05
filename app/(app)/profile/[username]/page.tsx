@@ -4,10 +4,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import useSWR from 'swr';
-import { UserCircle } from '@phosphor-icons/react';
+import { UserCircle, Play } from '@phosphor-icons/react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { SkeletonLoader } from '@/components/ui/SkeletonLoader';
+import { ProfileHeatmapCard } from '@/components/map/ProfileHeatmapCard';
+import { RunReplay } from '@/components/map/RunReplay';
 import { useAuth } from '@/hooks/useAuth';
 import {
   getUserByUsername,
@@ -31,6 +33,7 @@ export default function ProfilePage(): React.JSX.Element {
   const username = params.username;
   const { user } = useAuth();
   const [followLoading, setFollowLoading] = useState(false);
+  const [replayRun, setReplayRun] = useState<Run | null>(null);
 
   const { data: profile, isLoading: profileLoading } = useSWR(
     `profile-${username}`,
@@ -125,6 +128,9 @@ export default function ProfilePage(): React.JSX.Element {
         <StatCell value={String(stats?.streak_count ?? 0)} label="STREAK 🔥" />
       </div>
 
+      {/* Personal heatmap — all past routes stacked at low opacity */}
+      {!runsLoading && runs && <ProfileHeatmapCard runs={runs} />}
+
       {/* Run history */}
       <div className="px-4 pt-5">
         <h2 className="font-heading font-bold text-textPrimary text-xs uppercase tracking-widest mb-3">
@@ -136,10 +142,15 @@ export default function ProfilePage(): React.JSX.Element {
           <p className="text-textSecondary font-body text-sm py-10 text-center">No runs yet</p>
         ) : (
           <div className="space-y-2">
-            {runs.map((run) => <RunRow key={run.id} run={run} />)}
+            {runs.map((run) => (
+              <RunRow key={run.id} run={run} onReplay={() => setReplayRun(run)} />
+            ))}
           </div>
         )}
       </div>
+
+      {/* Run replay overlay — animates the selected run's GPS route */}
+      {replayRun && <RunReplay run={replayRun} onClose={() => setReplayRun(null)} />}
     </main>
   );
 }
@@ -153,9 +164,12 @@ function StatCell({ value, label }: { value: string; label: string }): React.JSX
   );
 }
 
-function RunRow({ run }: { run: Run }): React.JSX.Element {
+function RunRow({ run, onReplay }: { run: Run; onReplay: () => void }): React.JSX.Element {
   return (
-    <div className="bg-surface rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+    <button
+      onClick={onReplay}
+      className="w-full bg-surface rounded-xl px-4 py-3 flex items-center justify-between gap-3 text-left active:scale-[0.98] transition-transform"
+    >
       <div className="min-w-0">
         <p className="font-stats text-textPrimary text-lg leading-none">
           {formatDistance(run.distance_m)}
@@ -164,10 +178,13 @@ function RunRow({ run }: { run: Run }): React.JSX.Element {
           {formatRelativeTime(new Date(run.started_at))}
         </p>
       </div>
-      <div className="text-right flex-shrink-0">
-        <p className="font-body text-textPrimary text-sm">{formatDuration(run.duration_s)}</p>
-        <p className="text-textSecondary font-body text-xs">{formatPace(run.pace_s_per_km)} /km</p>
+      <div className="text-right flex-shrink-0 flex items-center gap-2">
+        <div>
+          <p className="font-body text-textPrimary text-sm">{formatDuration(run.duration_s)}</p>
+          <p className="text-textSecondary font-body text-xs">{formatPace(run.pace_s_per_km)} /km</p>
+        </div>
+        <Play size={16} weight="fill" className="text-accent flex-shrink-0" />
       </div>
-    </div>
+    </button>
   );
 }

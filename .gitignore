@@ -33,13 +33,20 @@ yarn-error.log*
 
 # cloudflare
 .cloudflare
+.wrangler/
+
+# supabase local/link metadata
+supabase/.temp/
+
+# next-pwa generated service worker output (regenerated on build)
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/worker-*.js
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-The .gitignore already has .env*.local.
-Just add these missing lines to it:
 
 # Supabase local
 .supabase/

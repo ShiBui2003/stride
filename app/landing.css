@@ -1,0 +1,87 @@
+/* Landing page styles — ported from the STRIDE landing design (fonts, glass panels, glows, marquee) */
+
+/* Fonts used by the landing page, by bare family name */
+@import '@fontsource/bebas-neue/400.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+/* Landing display headings use Bebas Neue, uppercase */
+.font-display {
+  font-family: 'Bebas Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glass-panel {
+  background: rgba(15, 17, 21, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-strong {
+  background: rgba(15, 17, 21, 0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-glow {
+  text-shadow: 0 0 30px rgba(199, 255, 61, 0.15), 0 0 60px rgba(199, 255, 61, 0.05);
+}
+
+.border-glow {
+  border-color: rgba(199, 255, 61, 0.3);
+  box-shadow: 0 0 20px rgba(199, 255, 61, 0.1);
+}
+
+.shadow-elevated {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(199, 255, 61, 0.05);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 30px rgba(199, 255, 61, 0.15), 0 0 60px rgba(199, 255, 61, 0.05);
+}
+
+.shadow-hud {
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}

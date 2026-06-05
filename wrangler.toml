@@ -1,0 +1,19 @@
+# Cloudflare Pages config for STRIDE.
+# STRIDE is a full Next.js 14 App Router app (middleware + dynamic SSR routes),
+# so it deploys to Cloudflare Pages via the @cloudflare/next-on-pages adapter,
+# NOT as a pure static export. The adapter emits a .vercel/output/static dir
+# that Pages serves. Install + build steps are documented in CLOUDFLARE.md.
+
+name = "stride"
+compatibility_date = "2024-09-23"
+
+# nodejs_compat lets the Edge runtime use Node built-ins that Next/Supabase pull in.
+compatibility_flags = ["nodejs_compat"]
+
+# Output directory produced by `npx @cloudflare/next-on-pages`.
+pages_build_output_dir = ".vercel/output/static"
+
+# Public env vars are also set in the Pages dashboard (Settings → Environment variables).
+# Never put service-role or VAPID private keys here — those stay server-side only.
+[vars]
+NEXT_PUBLIC_APP_URL = "https://stride.pages.dev"

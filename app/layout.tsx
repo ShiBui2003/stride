@@ -27,6 +27,8 @@ export const metadata: Metadata = {
   description: 'Capture territory. Outrun your rivals.',
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'STRIDE' },
+  // Modern replacement for the deprecated apple-mobile-web-app-capable meta tag
+  other: { 'mobile-web-app-capable': 'yes' },
 };
 
 export const viewport: Viewport = {
