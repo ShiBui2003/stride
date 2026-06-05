@@ -190,7 +190,7 @@ Next:
 **Rahul Jha**
 BTech Computer Science, Bennett University
 
-- GitHub: https://github.com/rahuljha
+- GitHub: https://github.com/ShiBui2003
 - LinkedIn: https://linkedin.com/in/rahuljha
 
 ## License
