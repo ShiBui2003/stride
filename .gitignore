@@ -38,6 +38,9 @@ yarn-error.log*
 # supabase local/link metadata
 supabase/.temp/
 
+# large source recordings — only the GIFs in assets/ are committed for the README
+assets/*.mp4
+
 # next-pwa generated service worker output (regenerated on build)
 public/sw.js
 public/sw.js.map

@@ -25,16 +25,9 @@ STRIDE is a GPS territory conquest game built on real-world running. You go outs
 
 ## Demo
 
-Both clips live in [assets/](assets/). GitHub does not autoplay local video in markdown, so click to download and watch, or drop them into a release or the repo wiki to embed them inline.
-
 | Capturing territory | Live map and leaderboard |
 | --- | --- |
-| [assets/demo1.mp4](assets/demo1.mp4) | [assets/demo2.mp4](assets/demo2.mp4) |
-
-<!-- Once hosted as a release asset, wiki file, or external CDN, these render inline on GitHub:
-<video src="assets/demo1.mp4" controls width="380"></video>
-<video src="assets/demo2.mp4" controls width="380"></video>
--->
+| ![Capturing territory](assets/demo1.gif) | ![Live map and leaderboard](assets/demo2.gif) |
 
 ## Features
 
