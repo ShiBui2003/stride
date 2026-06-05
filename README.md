@@ -13,15 +13,15 @@
 
 ### Run the city. Close the loop. Take the map.
 
-[![Build](https://img.shields.io/badge/build-passing-C8FF00?style=flat-square)](https://stride.pages.dev)
-[![Deployed on Cloudflare](https://img.shields.io/badge/Cloudflare%20Pages-live-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://stride.pages.dev)
+[![Build](https://img.shields.io/badge/build-passing-C8FF00?style=flat-square)](https://stride-6rm.pages.dev)
+[![Deployed on Cloudflare](https://img.shields.io/badge/Cloudflare%20Pages-live-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://stride-6rm.pages.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/license-MIT-888888?style=flat-square)](#license)
 
 STRIDE is a GPS territory conquest game built on real-world running. You go outside, track a route, and when you close a loop back on itself you capture the geographic area inside it as your territory on a live city map. Run through someone else's ground and you clip it off them. The map is a shared, contested battlefield that decays if you stop defending it, so standing still loses you ground. It is Strava meets Splix.io, with the competition layer being the entire point rather than a side feature.
 
-**Live:** https://stride.pages.dev
+**Live:** https://stride-6rm.pages.dev
 
 ## Demo
 
@@ -93,7 +93,7 @@ Browser (PWA)
 Requirements: Node 18 or newer, a Supabase project with PostGIS enabled, and a Google Maps API key.
 
 ```bash
-git clone https://github.com/rahuljha/stride.git
+git clone https://github.com/ShiBui2003/stride.git
 cd stride
 npm install
 ```
