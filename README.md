@@ -25,7 +25,7 @@ STRIDE is a GPS territory conquest game built on real-world running. You go outs
 
 ## Demo
 
-| Capturing territory | Live map and leaderboard |
+| Website | PWA-Supported APP |
 | --- | --- |
 | ![Capturing territory](assets/demo1.gif) | ![Live map and leaderboard](assets/demo2.gif) |
 
