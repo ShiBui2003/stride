@@ -1,6 +1,9 @@
 // Public profile page — stats, run history, and follow controls for any runner
 'use client';
 
+// Required by @cloudflare/next-on-pages — dynamic routes must run on the Edge Runtime
+export const runtime = 'edge';
+
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import useSWR from 'swr';
