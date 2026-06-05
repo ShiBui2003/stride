@@ -37,3 +37,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+The .gitignore already has .env*.local.
+Just add these missing lines to it:
+
+# Supabase local
+.supabase/
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+
+# Project guide files (local only)
+CLAUDE.md
+PROMPT.md
+ARCHITECTURE.md
+CONVENTIONS.md
+DONT.md
+PROGRESS.md

@@ -55,17 +55,46 @@ export function createMapOptions(): google.maps.MapOptions {
   };
 }
 
-// Returns the user's GPS position, or DEFAULT_CENTER after 5s timeout
-export async function getUserCenter(): Promise<google.maps.LatLngLiteral> {
+// Returns the user's GPS position, or null if unavailable/denied.
+export async function getUserCenter(): Promise<google.maps.LatLngLiteral | null> {
   return new Promise((resolve) => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      resolve(DEFAULT_CENTER);
+      resolve(null);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => resolve(DEFAULT_CENTER),
-      { timeout: 5000 }
+      () => resolve(null),
+      { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false }
+    );
+  });
+}
+
+// Requests fresh GPS, pans the map, and returns the resolved position.
+// On failure returns { error: string, position: null }; on success { error: null, position }.
+export async function centerMapOnUser(
+  map: google.maps.Map
+): Promise<{ error: string | null; position: google.maps.LatLngLiteral | null }> {
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      resolve({ error: 'Geolocation is not supported by this browser.', position: null });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const position = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        map.setCenter(position);
+        map.setZoom(15);
+        resolve({ error: null, position });
+      },
+      (err) => {
+        let error: string;
+        if (err.code === 1) error = 'Location access denied — allow it in your browser site settings.';
+        else if (err.code === 2) error = 'Location unavailable. Try again.';
+        else error = 'Location request timed out. Try again.';
+        resolve({ error, position: null });
+      },
+      { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
     );
   });
 }

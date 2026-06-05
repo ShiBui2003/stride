@@ -15,6 +15,9 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname();
 
+  // Active run is full-screen immersive — no nav chrome
+  if (pathname.startsWith('/run/active')) return null;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-t border-white/5 pb-safe">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">

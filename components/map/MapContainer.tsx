@@ -6,37 +6,46 @@ import { loadMapsAPI, createMapOptions, getUserCenter } from '@/lib/maps/mapConf
 
 interface MapContainerProps {
   onMapReady?: (map: google.maps.Map) => void;
+  onLocationResolved?: (position: google.maps.LatLngLiteral) => void;
   className?: string;
 }
 
-export function MapContainer({ onMapReady, className = '' }: MapContainerProps): React.JSX.Element {
+export function MapContainer({ onMapReady, onLocationResolved, className = '' }: MapContainerProps): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
-  // Ref so the init effect (empty deps, runs once) always calls the latest onMapReady
   const onMapReadyRef = useRef(onMapReady);
+  const onLocationResolvedRef = useRef(onLocationResolved);
   useEffect(() => {
     onMapReadyRef.current = onMapReady;
-  }, [onMapReady]);
+    onLocationResolvedRef.current = onLocationResolved;
+  }, [onMapReady, onLocationResolved]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     let cancelled = false;
 
-    loadMapsAPI()
-      .then(() => {
-        if (cancelled || !containerRef.current) return;
-
-        const map = new google.maps.Map(containerRef.current, createMapOptions());
-        mapRef.current = map;
-
-        // Pan to user's real position as soon as GPS resolves
-        getUserCenter().then((center) => {
-          if (!cancelled) map.setCenter(center);
-        });
-
-        onMapReadyRef.current?.(map);
+    // Create map immediately after the API loads so the user sees it right away.
+    // GPS runs in the background; if it succeeds we zoom to the real location.
+    // If GPS fails we stay at a neutral world view — never fake a city.
+    loadMapsAPI().then(() => {
+      if (cancelled || !containerRef.current) return;
+      const map = new google.maps.Map(containerRef.current, {
+        ...createMapOptions(),
+        center: { lat: 20, lng: 0 }, // neutral — overridden by GPS below
+        zoom: 3,
       });
+      mapRef.current = map;
+      onMapReadyRef.current?.(map);
+
+      getUserCenter().then((center) => {
+        if (!cancelled && center) {
+          map.setCenter(center);
+          map.setZoom(15);
+          onLocationResolvedRef.current?.(center);
+        }
+      });
+    });
 
     return () => {
       cancelled = true;

@@ -30,9 +30,12 @@ export default function HomePage(): React.JSX.Element {
     () => getRecentlyActiveFollowing(authUser!.id)
   );
 
+  // revalidateOnMount: true ensures a fresh fetch every time the home page mounts,
+  // bypassing the SWR dedup window — so a run completed seconds ago always shows up.
   const { data: feedItems = [], isLoading: feedLoading } = useSWR(
     authUser?.id ? `feed-${authUser.id}` : null,
-    () => getFeedRuns(authUser!.id)
+    () => getFeedRuns(authUser!.id),
+    { revalidateOnMount: true }
   );
 
   if (authLoading || !profile) {

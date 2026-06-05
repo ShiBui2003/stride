@@ -26,6 +26,8 @@ export async function getUserById(id: string): Promise<User | null> {
   return data as User;
 }
 
+// Upsert instead of insert so re-submitted onboarding forms don't 409 when a
+// previous attempt wrote the row but failed before setting onboarding_complete metadata.
 export async function createUser(
   id: string,
   profile: Omit<User, 'id' | 'created_at' | 'total_km' | 'streak_count' | 'rival_id'>
@@ -33,7 +35,7 @@ export async function createUser(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('users')
-    .insert({ id, ...profile })
+    .upsert({ id, ...profile }, { onConflict: 'id' })
     .select()
     .single();
 
@@ -54,20 +56,27 @@ export async function updateUser(id: string, updates: Partial<Omit<User, 'id' | 
   return data as User;
 }
 
-// Aggregates territory area, streak count, and weekly km for the stats bar
+// Aggregates territory area, streak count, total km, and weekly km for the stats bar.
+// total_km is computed directly from the runs table — the users.total_km column is never
+// written after onboarding, so reading it would always show 0.
 export async function getUserStats(userId: string): Promise<UserStats> {
   const supabase = createClient();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [profileRes, territoriesRes, weeklyRunsRes] = await Promise.all([
-    supabase.from('users').select('total_km, streak_count').eq('id', userId).single(),
+  const [profileRes, territoriesRes, allRunsRes, weeklyRunsRes] = await Promise.all([
+    supabase.from('users').select('streak_count').eq('id', userId).single(),
     supabase.from('territories').select('area_m2').eq('user_id', userId),
+    supabase.from('runs').select('distance_m').eq('user_id', userId),
     supabase.from('runs').select('distance_m').eq('user_id', userId).gte('started_at', weekAgo),
   ]);
 
-  const profile = profileRes.data as { total_km: number; streak_count: number } | null;
+  const profile = profileRes.data as { streak_count: number } | null;
   const territory_area_m2 = ((territoriesRes.data ?? []) as { area_m2: number }[]).reduce(
     (sum, t) => sum + t.area_m2,
+    0
+  );
+  const total_km = ((allRunsRes.data ?? []) as { distance_m: number }[]).reduce(
+    (sum, r) => sum + r.distance_m / 1000,
     0
   );
   const weekly_km = ((weeklyRunsRes.data ?? []) as { distance_m: number }[]).reduce(
@@ -76,7 +85,7 @@ export async function getUserStats(userId: string): Promise<UserStats> {
   );
 
   return {
-    total_km: profile?.total_km ?? 0,
+    total_km,
     streak_count: profile?.streak_count ?? 0,
     territory_area_m2,
     weekly_km,
@@ -108,6 +117,18 @@ export async function getRecentlyActiveFollowing(userId: string): Promise<User[]
   const usersRes = await supabase.from('users').select('*').in('id', activeIds);
   if (usersRes.error || !usersRes.data) return [];
   return usersRes.data as User[];
+}
+
+// Returns true if follower currently follows followingId — uses maybeSingle to avoid 406 on no-row
+export async function checkIsFollowing(followerId: string, followingId: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('follows')
+    .select('follower_id')
+    .eq('follower_id', followerId)
+    .eq('following_id', followingId)
+    .maybeSingle();
+  return data !== null;
 }
 
 export async function followUser(followerId: string, followingId: string): Promise<void> {

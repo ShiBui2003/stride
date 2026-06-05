@@ -19,19 +19,26 @@ export default function OnboardingPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Prevents form submission while the healing redirect (existing-profile check) is in progress
+  const [redirecting, setRedirecting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // If the user already has a profile row, mark metadata complete and skip to home.
-  // This heals accounts created before the onboarding_complete metadata was introduced.
+  // If the user already has a profile row (previous attempt wrote it but metadata update
+  // failed), set the flag and skip to /home. Block the form while this is in flight.
   useEffect(() => {
     if (authLoading || !user) return;
     const supabase = createClient();
+    setRedirecting(true);
     getUserById(user.id).then(async (profile) => {
-      if (!profile?.username) return;
-      // Ensure metadata flag is set so middleware lets them through next time
+      if (!profile?.username) {
+        setRedirecting(false);
+        return;
+      }
       await supabase.auth.updateUser({ data: { onboarding_complete: true } });
       router.replace('/home');
+    }).catch(() => {
+      setRedirecting(false);
     });
   }, [user, authLoading, router]);
 
@@ -53,7 +60,7 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!user) return;
+    if (!user || redirecting) return;
     setError(null);
     setLoading(true);
     try {
@@ -69,7 +76,14 @@ export default function OnboardingPage() {
       await supabase.auth.updateUser({ data: { onboarding_complete: true } });
       router.push('/home');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create profile');
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('users_username_key') || msg.includes('username')) {
+        setError('That username is already taken. Try a different one.');
+      } else if (msg.includes('users_email_key') || msg.includes('email')) {
+        setError('This email is already linked to another account. Try signing in instead.');
+      } else {
+        setError('Failed to save your profile. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -127,7 +141,7 @@ export default function OnboardingPage() {
 
         {error && <p className="text-danger text-sm font-body">{error}</p>}
 
-        <Button type="submit" variant="accent" size="lg" loading={loading} className="w-full mt-auto">
+        <Button type="submit" variant="accent" size="lg" loading={loading || redirecting} className="w-full mt-auto">
           Start Running →
         </Button>
       </form>

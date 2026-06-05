@@ -11,8 +11,8 @@ interface RunHUDProps {
 
 export function RunHUD({ run }: RunHUDProps): React.JSX.Element {
   return (
-    <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-12 pb-6 bg-gradient-to-b from-background/90 to-transparent pointer-events-none">
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 max-w-xs mx-auto">
+    <div className="flex-shrink-0 px-4 pt-12 pb-5 bg-background border-b border-white/5">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-3 max-w-xs mx-auto">
         <StatBlock label="DISTANCE" value={formatDistance(run.distance_m)} highlight />
         <StatBlock label="PACE /KM" value={formatPace(run.pace_s_per_km)} />
         <StatBlock label="DURATION" value={formatDuration(run.duration_s)} />
